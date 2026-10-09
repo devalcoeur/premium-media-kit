@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#080808"/>
-<title>Christian Devalcoeur — Premium Media Kit • Animated Edition V12 • Mobile Canvas</title>
+<title>Christian Devalcoeur — Premium Media Kit • Animated Edition V13 · Immersive Mobile • Mobile Canvas</title>
 <style>
 :root{color-scheme:dark;--gold:#e3c16c;--off:#f8f3e5;--edge:rgba(230,195,106,.28)}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 40%,#262016 0,#090a0b 60%,#050507 100%);color:var(--off);font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;min-height:100vh;overflow-x:hidden}
@@ -212,6 +212,47 @@ body.no-motion .animated-layer{display:none!important}
 .fx-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 body.no-motion .animated-layer{display:none!important}
 @media(prefers-reduced-motion:reduce){body.force-motion:not(.no-motion) .animated-layer{display:block!important}}
+
+/* V13 — immersive reader: full available screen, without changing page content */
+html.reader-fullscreen,html.reader-fullscreen body {margin:0;width:100%;height:100%;overflow:hidden;background:#000}
+html.reader-fullscreen .shell {
+  position:fixed;inset:0;width:100%;height:100dvh;min-height:0;
+  padding:0;gap:0;overflow:hidden;background:#000;
+}
+html.reader-fullscreen header {
+  position:fixed;top:calc(env(safe-area-inset-top, 0px) + 7px);right:8px;
+  width:auto;z-index:30;pointer-events:none;
+}
+html.reader-fullscreen header>div:first-child,
+html.reader-fullscreen header .toolbar #music,
+html.reader-fullscreen header .toolbar #motion {display:none!important}
+html.reader-fullscreen header .toolbar {pointer-events:auto}
+html.reader-fullscreen #fullscreen {
+  background:rgba(8,8,8,.65);border:1px solid rgba(217,185,105,.45);
+  padding:8px 11px;box-shadow:0 2px 12px #0008
+}
+html.reader-fullscreen .stage {
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  width:100%;height:100dvh;min-height:0;padding:0;overflow:hidden;
+}
+html.reader-fullscreen .book {
+  /* Preserve full-page visibility: on portrait phones width usually fills 100vw */
+  width:min(100vw,calc(100dvh * 1055 / 1491));
+  height:auto;max-height:100dvh;aspect-ratio:1055 / 1491;
+  box-shadow:none;margin:0;flex:none;
+}
+html.reader-fullscreen nav {
+  position:fixed;z-index:25;bottom:calc(env(safe-area-inset-bottom,0px) + 6px);
+  left:50%;transform:translateX(-50%);width:auto;gap:9px;
+  padding:4px 6px;background:rgba(0,0,0,.48);border-radius:12px;
+}
+html.reader-fullscreen nav button {font-size:12px;padding:7px 10px;background:rgba(13,13,13,.65)}
+html.reader-fullscreen nav .counter {min-width:62px;font-size:11px}
+html.reader-fullscreen .dots,html.reader-fullscreen .help {display:none}
+/* Fallback when Fullscreen API is unavailable; still uses full viewport */
+@media (max-width:650px) {
+ html.reader-fullscreen .book {width:min(100vw,calc(100dvh * 1055 / 1491))}
+}
 </style></head><body>
 <div class="shell">
 <header><div><div class="brand">CHRISTIAN DEVALCOEUR · PREMIUM MEDIA KIT</div><div class="sub">Интерактивная презентация · 3 страницы · диагональные золотые искры с асимметричным распределением сверху и снизу · объёмный дым по центру</div></div><div class="toolbar"><button id="music" aria-pressed="false" title="Включить или выключить музыку">♫ Музыка: выкл.</button><button id="motion" aria-pressed="true" title="Выключить или включить анимацию">✦ Анимация: вкл.</button><button id="fullscreen" title="На весь экран">⛶ Экран</button></div></header>
@@ -307,6 +348,35 @@ function renderFx(timestamp){
 }
 requestAnimationFrame(renderFx);
 
-const fs=document.querySelector('#fullscreen');fs.addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{fs.textContent='Не поддерживается'}});
+const fs=document.querySelector('#fullscreen');
+let readerMode=false;
+function syncReader(){
+ document.documentElement.classList.toggle('reader-fullscreen',readerMode);
+ fs.textContent=readerMode?'⤢ Выйти':'⛶ Экран';
+ fs.setAttribute('aria-pressed',String(readerMode));
+ // Canvas measures the newly sized page on the next animation frame.
+}
+fs.addEventListener('click',async()=>{
+ if(readerMode){
+   readerMode=false;syncReader();
+   if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){}}
+ }else{
+   readerMode=true;syncReader();
+   try {
+     if(document.documentElement.requestFullscreen)
+       await document.documentElement.requestFullscreen({navigationUI:'hide'});
+   }catch(e){
+     // Retain the immersive layout as a safe fallback for Yandex/mobile browsers.
+   }
+ }
+});
+document.addEventListener('fullscreenchange',()=>{
+ if(!document.fullscreenElement && readerMode){
+   readerMode=false;syncReader();
+ }
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape' && readerMode && !document.fullscreenElement){readerMode=false;syncReader();}
+});
 })();
 </script></body></html>
