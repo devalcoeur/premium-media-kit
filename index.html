@@ -176,6 +176,36 @@ body.no-motion .animated-layer{display:none!important}
 
 .spark-band.top .spark-field{left:-18%;}
 .spark-band.bottom .spark-field{left:4%;}
+
+/* Mobile animation compatibility: explicit on-state overrides reduced-motion reset. */
+@media (max-width: 820px) {
+ .spark-band{height:18%;-webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 14%,#000 84%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0%,#000 14%,#000 84%,transparent 100%)}
+ .spark-band.top{opacity:.80}
+ .spark-band.bottom{opacity:.75}
+ .spark-field{inset:-48% -30%;background-size:47px 57px,79px 83px,117px 99px,107px 123px;will-change:transform}
+ .smoke-flow{filter:blur(12px);will-change:transform,opacity}
+}
+/* The mobile visitor deliberately enables movement using the on/off button. */
+@media (prefers-reduced-motion: reduce) {
+ body.force-motion:not(.no-motion) .spark-band .spark-field {
+  animation-name:diagonalSpark!important;
+  animation-duration:9s!important;
+  animation-timing-function:linear!important;
+  animation-iteration-count:infinite!important;
+  animation-play-state:running!important;
+ }
+ body.force-motion:not(.no-motion) .spark-band.bottom .spark-field{animation-duration:12s!important}
+ body.force-motion:not(.no-motion) .smoke-flow{
+  animation-name:smokeSlide!important;
+  animation-duration:8s!important;
+  animation-timing-function:ease-in-out!important;
+  animation-iteration-count:infinite!important;
+  animation-direction:alternate!important;
+  animation-play-state:running!important;
+ }
+ body.force-motion:not(.no-motion) .smoke-flow.second{animation-duration:11s!important;animation-direction:alternate-reverse!important}
+ body.force-motion:not(.no-motion) .smoke-flow.third{animation-duration:14s!important}
+}
 </style></head><body>
 <div class="shell">
 <header><div><div class="brand">CHRISTIAN DEVALCOEUR · PREMIUM MEDIA KIT</div><div class="sub">Интерактивная презентация · 3 страницы · диагональные золотые искры с асимметричным распределением сверху и снизу · объёмный дым по центру</div></div><div class="toolbar"><button id="music" aria-pressed="false" title="Включить или выключить музыку">♫ Музыка: выкл.</button><button id="motion" aria-pressed="true" title="Выключить или включить анимацию">✦ Анимация: вкл.</button><button id="fullscreen" title="На весь экран">⛶ Экран</button></div></header>
